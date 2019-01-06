@@ -1,7 +1,11 @@
+import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.StdRandom;
+import edu.princeton.cs.algs4.StdStats;
+
 public class PercolationStats {
 
-    private int experimentsCount;
-    private Percolation pr;
+    private int cnt;
+    private Percolation percolation;
     private double[] fractions;
 
     /**
@@ -11,16 +15,16 @@ public class PercolationStats {
         if (N <= 0 || T <= 0) {
             throw new IllegalArgumentException("Given N <= 0 || T <= 0");
         }
-        experimentsCount = T;
-        fractions = new double[experimentsCount];
-        for (int expNum = 0; expNum < experimentsCount; expNum++) {
-            pr = new Percolation(N);
+        cnt = T;
+        fractions = new double[cnt];
+        for (int expNum = 0; expNum < cnt; expNum++) {
+            percolation = new Percolation(N);
             int openedSites = 0;
-            while (!pr.percolates()) {
+            while (!percolation.percolates()) {
                 int i = StdRandom.uniform(1, N + 1);
                 int j = StdRandom.uniform(1, N + 1);
-                if (!pr.isOpen(i, j)) {
-                    pr.open(i, j);
+                if (!percolation.isOpen(i, j)) {
+                    percolation.open(i, j);
                     openedSites++;
                 }
             }
@@ -29,37 +33,27 @@ public class PercolationStats {
         }
     }
 
-    /**
-     * Sample mean of percolation threshold.
-     */
     public double mean() {
         return StdStats.mean(fractions);
     }
 
-    /**
-     * Sample standard deviation of percolation threshold.
-     */
     public double stddev() {
         return StdStats.stddev(fractions);
     }
 
-    /**
-     * Returns lower bound of the 95% confidence interval.
-     */
     public double confidenceLo() {
-        return mean() - ((1.96 * stddev()) / Math.sqrt(experimentsCount));
+        return mean() - ((1.96 * stddev()) / Math.sqrt(cnt));
     }
 
-    /**
-     * Returns upper bound of the 95% confidence interval.
-     */
     public double confidenceHi() {
-        return mean() + ((1.96 * stddev()) / Math.sqrt(experimentsCount));
+        return mean() + ((1.96 * stddev()) / Math.sqrt(cnt));
     }
 
     public static void main(String[] args) {
         int N = Integer.parseInt(args[0]);
         int T = Integer.parseInt(args[1]);
+//    	int N = 2;
+//    	int T = 1000000;
         PercolationStats ps = new PercolationStats(N, T);
 
         String confidence = ps.confidenceLo() + ", " + ps.confidenceHi();

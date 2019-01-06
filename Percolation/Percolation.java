@@ -1,44 +1,54 @@
+import edu.princeton.cs.algs4.WeightedQuickUnionUF;
+
 public class Percolation {
 
-    private boolean[][] opened;
-    private int top = 0;
-    private int bottom;
-    private int size;
-    private WeightedQuickUnionUF qf;
-
+    private int virtualTop = 0;
+    private int virtualBottom;
+    private int gridSize;
+    private WeightedQuickUnionUF wquf;
+    private boolean[][] openSites;
+    
     /**
-     * Creates N-by-N grid, with all sites blocked.
+     * Initialize N-by-N grid.
+     * @throws IllegalArgumentException
      */
     public Percolation(int N) {
-        size = N;
-        bottom = size * size + 1;
-        qf = new WeightedQuickUnionUF(size * size + 2);
-        opened = new boolean[size][size];
+        if(N<=0){
+        	throw new IllegalArgumentException();
+        }
+        gridSize = N;
+        virtualBottom = gridSize * gridSize + 1;
+        wquf = new WeightedQuickUnionUF(gridSize * gridSize + 2);
+        openSites = new boolean[gridSize][gridSize];
     }
 
     /**
-     * Opens site (row i, column j) if it is not already.
+     * Opens site (row i, column j).
+     * @throws IllegalArgumentException
      */
     public void open(int i, int j) {
-        opened[i - 1][j - 1] = true;
+    	if(i<=0 || i>gridSize || j <=0 || j> gridSize) {
+    		throw new IllegalArgumentException();
+    	}
+        openSites[i - 1][j - 1] = true;
         if (i == 1) {
-            qf.union(getQFIndex(i, j), top);
+            wquf.union(getQFIndex(i, j), virtualTop);
         }
-        if (i == size) {
-            qf.union(getQFIndex(i, j), bottom);
+        if (i == gridSize) {
+            wquf.union(getQFIndex(i, j), virtualBottom);
         }
 
         if (j > 1 && isOpen(i, j - 1)) {
-            qf.union(getQFIndex(i, j), getQFIndex(i, j - 1));
+            wquf.union(getQFIndex(i, j), getQFIndex(i, j - 1));
         }
-        if (j < size && isOpen(i, j + 1)) {
-            qf.union(getQFIndex(i, j), getQFIndex(i, j + 1));
+        if (j < gridSize && isOpen(i, j + 1)) {
+            wquf.union(getQFIndex(i, j), getQFIndex(i, j + 1));
         }
         if (i > 1 && isOpen(i - 1, j)) {
-            qf.union(getQFIndex(i, j), getQFIndex(i - 1, j));
+            wquf.union(getQFIndex(i, j), getQFIndex(i - 1, j));
         }
-        if (i < size && isOpen(i + 1, j)) {
-            qf.union(getQFIndex(i, j), getQFIndex(i + 1, j));
+        if (i < gridSize && isOpen(i + 1, j)) {
+            wquf.union(getQFIndex(i, j), getQFIndex(i + 1, j));
         }
     }
 
@@ -46,17 +56,20 @@ public class Percolation {
      * Is site (row i, column j) open?
      */
     public boolean isOpen(int i, int j) {
-        return opened[i - 1][j - 1];
+    	if(i<=0 || i>gridSize || j <=0 || j> gridSize) {
+    		throw new IllegalArgumentException();
+    	}
+        return openSites[i - 1][j - 1];
     }
 
     /**
      * Is site (row i, column j) full?
      */
     public boolean isFull(int i, int j) {
-        if (0 < i && i <= size && 0 < j && j <= size) {
-            return qf.connected(top, getQFIndex(i , j));
+        if (0 < i && i <= gridSize && 0 < j && j <= gridSize) {
+            return wquf.connected(virtualTop, getQFIndex(i , j));
         } else {
-            throw new IndexOutOfBoundsException();
+            throw new IllegalArgumentException();
         }
     }
 
@@ -64,11 +77,11 @@ public class Percolation {
      * Does the system percolate?
      */
     public boolean percolates() {
-        return qf.connected(top, bottom);
+        return wquf.connected(virtualTop, virtualBottom);
     }
 
     private int getQFIndex(int i, int j) {
-        return size * (i - 1) + j;
+        return gridSize * (i - 1) + j;
     }
 }
 
